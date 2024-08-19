@@ -5,6 +5,7 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.util.Log
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -18,7 +19,7 @@ import kotlinx.coroutines.launch
 
 class ConnectionManager(private val context: Context) {
 
-    private class Connectivity(context: Context): ConnectionListener {
+    private class Connectivity(val context: Context): ConnectionListener {
         private val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
@@ -63,7 +64,34 @@ class ConnectionManager(private val context: Context) {
             }.distinctUntilChanged()
         }
 
+        private fun isOnline(): Boolean {
+            val connectivityManager =
+                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            if (connectivityManager != null) {
+                val capabilities =
+                    connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+                if (capabilities != null) {
+                    if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                        Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
+                        return true
+                    } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                        Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
+                        return true
+                    } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
+                        Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
+                        return true
+                    }
+                }
+            }
+            return false
+        }
+
         fun observe() {
+            if (isOnline()) {
+                _statusLiveData.postValue(ConnectionListener.Status.AVAILABLE)
+            } else {
+                _statusLiveData.postValue(ConnectionListener.Status.LOST)
+            }
             CoroutineScope(Dispatchers.IO).launch {
                 onConnectionStatusChangedListener().collect {
                     _statusLiveData.postValue(it)
@@ -73,27 +101,7 @@ class ConnectionManager(private val context: Context) {
 
     }
 
-    fun isOnline(context: Context): Boolean {
-        val connectivityManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        if (connectivityManager != null) {
-            val capabilities =
-                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-            if (capabilities != null) {
-                if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
-                    return true
-                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
-                    return true
-                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
-                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
-                    return true
-                }
-            }
-        }
-        return false
-    }
+
 
     fun listenConnection(owner: LifecycleOwner, listener: OnConnectionChangedListener) {
         val connectivity = Connectivity(context)
