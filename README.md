@@ -2,7 +2,6 @@
 ![Static Badge](https://img.shields.io/badge/Kotlin-mauve)
 ![Static Badge](https://img.shields.io/badge/latest%20release:-1.1.0-red)
 ![Static Badge](https://img.shields.io/badge/jitpackio-black)
-[![HitCount](https://hits.dwyl.com/MohamedKandel/Network-Connetivity.svg?style=flat)](http://hits.dwyl.com/MohamedKandel/Network-Connetivity)
 
 
 ## Network connectivity: Effortlessly Track network status (Avaialble or not) -LIVE- in Your Android App
