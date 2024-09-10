@@ -17,7 +17,17 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
-class ConnectionManager(private val context: Context) {
+class ConnectionManager() {
+
+    companion object {
+        private var instance: ConnectionManager ?= null
+        fun getInstance(): ConnectionManager {
+            if (instance == null) {
+                instance = ConnectionManager()
+            }
+            return instance as ConnectionManager
+        }
+    }
 
     private class Connectivity(val context: Context): ConnectionListener {
         private val connectivityManager =
@@ -103,7 +113,7 @@ class ConnectionManager(private val context: Context) {
 
 
 
-    fun listenConnection(owner: LifecycleOwner, listener: OnConnectionChangedListener) {
+    fun listenConnection(owner: LifecycleOwner, context: Context, listener: OnConnectionChangedListener) {
         val connectivity = Connectivity(context)
         connectivity.observe()
         connectivity.statusLiveData.observe(owner) {
