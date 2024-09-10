@@ -1,6 +1,6 @@
 ![Static Badge](https://img.shields.io/badge/Android-green) 
 ![Static Badge](https://img.shields.io/badge/Kotlin-mauve)
-![Static Badge](https://img.shields.io/badge/latest%20release:-1.1.0-red)
+![Static Badge](https://img.shields.io/badge/latest%20release:-1.2.0-red)
 ![Static Badge](https://img.shields.io/badge/jitpackio-black)
 
 
@@ -47,9 +47,9 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        connectivity = ConnectionManager(this)
+        connectivity = ConnectionManager.getInstance()
 
-        connectivity.listenConnection(this, object : OnConnectionChangedListener {
+        connectivity.listenConnection(owner = this, context = this, listener =  object : OnConnectionChangedListener {
             override fun onConnectionAvailable() {
                 // network connection available (do something need internet connection)
                 fetchDataAPI()
